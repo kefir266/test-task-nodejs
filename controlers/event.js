@@ -20,7 +20,7 @@ function save(req, res) {
 function getNumberVisits(req, res) {
   if (req.query.uid && req.query.date && req.query.tt) {
     Event.getNumberVisits(req.query)
-      .then(result => res.json({ result: result.length }))
+      .then(result => res.json({ result: result }))
       .catch(err => res.status(400).send(err));
   } else {
     res.status(401).send('Bad request');

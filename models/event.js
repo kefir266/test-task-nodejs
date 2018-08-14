@@ -30,18 +30,37 @@ const schema = new Schema({
     type: String,
     trim: true
   },
+  type: {
+    type: String,
+    trim: true
+  },
   created: {
     type: Date,
-    default: Date.now }
+    default: Date.now
+  }
 });
 
 class Event {
-  static getNumberVisits(query){
-    const startDate = moment(query.date).startOf('day');
-    const endDate = moment(query.date).endOf('day');
-    const request = { uid: query.uid, tt: query.tt, created: { $gte: startDate, $lt: endDate }};
-    return this.aggregate.group(request)
-      .sort({ created: 1 })
+  static getNumberVisits(query) {
+    const startDate = moment(query.date * 1000).startOf('day');
+    const endDate = moment(query.date * 1000).endOf('day');
+    return this.aggregate([
+      {
+        $match:
+          {
+            $and: [
+              {created: {$gte: startDate.toDate()}},
+              {created: {$lte: endDate.toDate()}},
+              {type: {$ne: 'install'}}
+            ]
+          }
+      },
+      {
+        $group: {
+          '_id': {tt: "$tt", ts: "$ts"},
+          'count': {$sum: 1}
+        }
+      }])
       .exec();
   }
 }
