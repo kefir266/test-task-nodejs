@@ -1,8 +1,12 @@
 'use strict';
 const Event = require('../models/event');
+const SqlEvent = require('../models/sql-events');
+
 module.exports = {
   save,
-  getNumberVisits
+  getNumberVisits,
+  getMostActiveUsers,
+  getNumbersOfInstallations
 };
 
 function save(req, res) {
@@ -26,6 +30,19 @@ function getNumberVisits(req, res) {
     res.status(401).send('Bad request');
   }
 }
+
+function getMostActiveUsers(req, res) {
+  Event.getMostActiveUsers(req.query)
+    .then(result => res.json({ result: result }))
+    .catch(err => res.status(400).send(err));
+}
+
+function getNumbersOfInstallations(req, res) {
+  SqlEvent.getNumbersOfInstallations(req.query)
+    .then(result => res.json({ result: result }))
+    .catch(err => res.status(400).send(err));
+}
+
 function isEventValid(query) {
 
   return query.type && query.uid && query.ts && query.tt &&

@@ -37,6 +37,11 @@ const schema = new Schema({
   created: {
     type: Date,
     default: Date.now
+  },
+  application: {
+    type: String,
+    trim: true,
+    default: 'Application'
   }
 });
 
@@ -57,10 +62,37 @@ class Event {
       },
       {
         $group: {
-          '_id': {tt: "$tt", ts: "$ts"},
+          '_id': {tt: "$tt", ts: "$ts", created: "$created"},
           'count': {$sum: 1}
         }
-      }])
+      },
+      {
+        $sort: {
+          created: 1
+        }
+      }
+      ])
+      .exec();
+  }
+  static getMostActiveUsers(query) {
+    return this.aggregate([
+      {
+        $group: {
+          '_id': {
+            user: "$uid",
+            application: "$application",
+            tt: "$tt",
+            ts: "$ts"
+          },
+          'numberOfVisits': {$sum: 1}
+        }
+      },
+      {
+        $sort: {
+          numberOfVisits: -1
+        }
+      }
+    ])
       .exec();
   }
 }
